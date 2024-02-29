@@ -8,11 +8,12 @@ import {
   TextInput,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import Types from "../components/types";
 
 const MenuScreen = () => {
   const route = useRoute();
   const [option, setOption] = useState("");
-  const [type, setType] = useState("");
+  const [selectedType, setSelectedType] = useState("");
   return (
     <SafeAreaView>
       <View
@@ -123,90 +124,8 @@ const MenuScreen = () => {
         </Text>
       </Pressable>
 
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          marginHorizontal: 10,
-        }}
-      >
-        <Pressable
-          onPress={() => setType("雞肉")}
-          style={{
-            backgroundColor: type == "雞肉" ? "#e9967a" : "white",
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 20,
-          }}
-        >
-          <Text
-            style={{ fontSize: 15, color: type == "雞肉" ? "white" : "black" }}
-          >
-            雞肉
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setType("豬肉")}
-          style={{
-            backgroundColor: type == "豬肉" ? "#e9967a" : "white",
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 20,
-          }}
-        >
-          <Text
-            style={{ fontSize: 15, color: type == "豬肉" ? "white" : "black" }}
-          >
-            豬肉
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setType("牛肉")}
-          style={{
-            backgroundColor: type == "牛肉" ? "#e9967a" : "white",
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 20,
-          }}
-        >
-          <Text
-            style={{ fontSize: 15, color: type == "牛肉" ? "white" : "black" }}
-          >
-            牛肉
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setType("蔬菜")}
-          style={{
-            backgroundColor: type == "蔬菜" ? "#e9967a" : "white",
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 20,
-          }}
-        >
-          <Text
-            style={{ fontSize: 15, color: type == "蔬菜" ? "white" : "black" }}
-          >
-            蔬菜
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setType("湯品")}
-          style={{
-            backgroundColor: type == "湯品" ? "#e9967a" : "white",
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-            borderRadius: 20,
-          }}
-        >
-          <Text
-            style={{ fontSize: 15, color: type == "湯品" ? "white" : "black" }}
-          >
-            湯品
-          </Text>
-        </Pressable>
-      </View>
+      <Types selectedType={selectedType} setSelectedType={setSelectedType} />
+
       <View
         style={{
           marginTop: 15,
