@@ -4,6 +4,7 @@ import React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
 import MenuScreen from "../screens/MenuScreen";
+import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -19,6 +20,11 @@ const StackNavigator = () => {
           options={{ headerShown: false }}
           name="Menu"
           component={MenuScreen}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="RecipeDetail"
+          component={RecipeDetailScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

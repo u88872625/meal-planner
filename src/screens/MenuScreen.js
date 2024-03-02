@@ -7,7 +7,7 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Types from "../components/types";
 import Recipes from "../components/Recipes";
 import { addMenu, getAllRecipes } from "../../firebase/firestore";
@@ -18,14 +18,13 @@ const MenuScreen = () => {
   const [selectedType, setSelectedType] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (route?.params?.items) {
       setMenuItems(route?.params?.items);
     }
   }, [route?.params?.items]);
-
-  console.log(menuItems);
 
   useEffect(() => {
     const handleGetRecipes = async () => {
@@ -48,7 +47,12 @@ const MenuScreen = () => {
       ],
     };
     await addMenu(dish);
+    setMenuItems((prevItems) => [...prevItems, dish.items[0]]);
   };
+
+  const filteredRecipes = selectedType
+    ? recipes.filter((recipe) => recipe.type === selectedType)
+    : recipes;
 
   return (
     <SafeAreaView>
@@ -60,7 +64,10 @@ const MenuScreen = () => {
           backgroundColor: "#fd5c63",
         }}
       >
-        <Text style={{ flex: 1, color: "white" }}>Back</Text>
+        <Pressable onPress={() => navigation.goBack()} style={{ flex: 1 }}>
+          <Text style={{ color: "white" }}>Back</Text>
+        </Pressable>
+
         <View style={{ flex: 1 }}>
           <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
             {route?.params.date}
@@ -350,7 +357,7 @@ const MenuScreen = () => {
           </Text>
         </Pressable>
       </View>
-      <Recipes recipes={recipes} addDishToMenu={addDishToMenu} />
+      <Recipes recipes={filteredRecipes} addDishToMenu={addDishToMenu} />
     </SafeAreaView>
   );
 };

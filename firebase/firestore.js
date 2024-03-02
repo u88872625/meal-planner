@@ -1,4 +1,11 @@
-import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "./firebase";
 import moment from "moment";
 
@@ -80,5 +87,40 @@ export const fetchWeekMenus = async () => {
     return weekMenus;
   } catch (error) {
     console.error("查詢失敗：", error);
+  }
+};
+
+// 複製menu
+export const copyMenu = async ({ prevDate, nextDate }) => {
+  try {
+    const menusCollectionRef = collection(db, "menus");
+    const q = query(menusCollectionRef, where("date", "==", prevDate));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(async (doc) => {
+      const menuData = doc.data();
+      await addDoc(menusCollectionRef, { ...menuData, date: nextDate });
+    });
+
+    console.log("Menu copied successfully");
+  } catch (error) {
+    console.error("Error copying menu:", error);
+  }
+};
+
+// 刪除menu
+export const deleteMenu = async (dateToDelete) => {
+  try {
+    const menusCollectionRef = collection(db, "menus");
+    const q = query(menusCollectionRef, where("date", "==", dateToDelete));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+
+    console.log("Menu delete successfully");
+  } catch (error) {
+    console.error("Error delete menu:", error);
   }
 };

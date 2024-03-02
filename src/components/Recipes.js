@@ -1,12 +1,15 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { Component, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 const Recipes = ({ recipes, addDishToMenu }) => {
+  const navigation = useNavigation();
   return (
     <View style={{ marginHorizontal: 16, marginVertical: 12 }}>
       <Text>Recipe</Text>
       {recipes.map((recipe) => (
         <Pressable
+          onPress={() => navigation.navigate("RecipeDetail", recipe)}
           key={recipe.id}
           style={{
             flexDirection: "row",

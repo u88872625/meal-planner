@@ -9,8 +9,18 @@ import {
   Pressable,
   SafeAreaView,
   use,
+  Alert,
 } from "react-native";
-import { getAllMenus, fetchWeekMenus } from "../../firebase/firestore";
+import {
+  getAllMenus,
+  fetchWeekMenus,
+  copyMenu,
+  deleteMenu,
+} from "../../firebase/firestore";
+import { BottomModal } from "react-native-modals";
+import { SlideAnimation } from "react-native-modals";
+import { ModalContent } from "react-native-modals";
+import { Modal } from "react-native-modals";
 
 const HomeScreen = () => {
   const currentDate = moment();
@@ -22,7 +32,16 @@ const HomeScreen = () => {
   const [menuData, setMenuData] = useState([]);
   const [weekMenu, setWeekMenu] = useState([]);
   const [ingredientsSummary, setIngredientsSummary] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modal, setModal] = useState(false);
   const navigation = useNavigation();
+
+  const openMadal = (date) => {
+    setDate(date.format("ddd") + " " + date.format("DD"));
+    const nextDate = moment(date, "ddd DD").add(1, "day").format("ddd DD");
+    setNextDate(nextDate);
+    setModalVisible(!modalVisible);
+  };
 
   // 取得所有menu
   const handleGetMenu = async () => {
@@ -39,6 +58,35 @@ const HomeScreen = () => {
     const weekMenus = await fetchWeekMenus(startOfWeek, endOfWeek);
     console.log("weekMenus", weekMenus);
     setWeekMenu(weekMenus);
+  };
+
+  const copyItems = async () => {
+    const formattedPrevDate = date;
+    const formattedNextDate = nextDate;
+    await copyMenu({
+      prevDate: formattedPrevDate,
+      nextDate: formattedNextDate,
+    });
+
+    setModalVisible(false);
+
+    handleGetMenu();
+    handleGetWeekMenus();
+    Alert.alert("Success", "Items copie");
+  };
+
+  // 刪除menu
+  const deleteItems = (date) => {
+    setModal(!modal);
+    setSelectedDate(date.format("ddd") + " " + date.format("DD"));
+  };
+
+  const deleteItemsByDate = async () => {
+    const dateToDelete = selectedDate;
+    await deleteMenu(dateToDelete);
+    handleGetMenu();
+    handleGetWeekMenus();
+    setModal(false);
   };
 
   useEffect(() => {
@@ -352,12 +400,18 @@ const HomeScreen = () => {
               </View>
             )}
 
-            <Pressable style={{ position: "absolute", bottom: 5, right: 30 }}>
+            <Pressable
+              onPress={() => openMadal(date)}
+              style={{ position: "absolute", bottom: 5, right: 30 }}
+            >
               <Text style={{ fontSize: 10, fontWeight: "500", color: "gray" }}>
                 Copy
               </Text>
             </Pressable>
-            <Pressable style={{ position: "absolute", bottom: 5, right: 10 }}>
+            <Pressable
+              onPress={() => deleteItems(date)}
+              style={{ position: "absolute", bottom: 5, right: 10 }}
+            >
               <Text style={{ fontSize: 10, fontWeight: "500", color: "gray" }}>
                 Del
               </Text>
@@ -389,24 +443,161 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScrollView style={{ marginTop: 50 }}>
-      <View style={{ flex: 1, padding: 12 }}>
-        <View
-          style={{
-            backgroundColor: "white",
-            borderRadius: 20,
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: "600", padding: 10 }}>
-            本週用到的食材有：
-          </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {renderIngredientsSummary()}
+    <>
+      <ScrollView style={{ marginTop: 50 }}>
+        <View style={{ flex: 1, padding: 12 }}>
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 20,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "600", padding: 10 }}>
+              本週用到的食材有：
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {renderIngredientsSummary()}
+            </View>
           </View>
+          {renderWeeks(3)}
         </View>
-        {renderWeeks(3)}
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      <BottomModal
+        onBackdropPress={() => setModalVisible(!modalVisible)}
+        swipeDirection={["up", "down"]}
+        swipeThreshold={200}
+        modalAnimation={
+          new SlideAnimation({
+            slideFrom: "bottom",
+          })
+        }
+        onHardwareBackPress={() => setModalVisible(!modalVisible)}
+        visible={modalVisible}
+        onTouchOutside={() => setModalVisible(!modalVisible)}
+      >
+        <ModalContent>
+          <View>
+            <Text
+              style={{ fontSize: 16, fontWeight: "500", textAlign: "center" }}
+            >
+              Copy or move
+            </Text>
+            <View
+              style={{
+                backgroundColor: "#fd5c63",
+                padding: 10,
+                borderRadius: 6,
+                justifyContent: "center",
+                alignContent: "center",
+                marginTop: "12",
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                {date}-{nextDate}
+              </Text>
+            </View>
+            <View
+              style={{
+                marginTop: 30,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Pressable
+                onPress={copyItems}
+                style={{
+                  backgroundColor: "#db7093",
+                  width: 100,
+                  padding: 10,
+                  borderRadius: 20,
+                  marginVertical: 12,
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    color: "white",
+                  }}
+                >
+                  Copy
+                </Text>
+              </Pressable>
+              <Pressable
+                style={{
+                  backgroundColor: "#db7093",
+                  width: 100,
+                  padding: 10,
+                  borderRadius: 20,
+                  marginVertical: 12,
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    color: "white",
+                  }}
+                >
+                  Move
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </ModalContent>
+      </BottomModal>
+
+      <BottomModal
+        onBackdropPress={() => setModal(!modal)}
+        swipeDirection={["up", "down"]}
+        swipeThreshold={200}
+        modalAnimation={
+          new SlideAnimation({
+            slideFrom: "bottom",
+          })
+        }
+        onHardwareBackPress={() => setModal(!modal)}
+        visible={modal}
+        onTouchOutside={() => setModal(!modal)}
+      >
+        <ModalContent style={{ width: "100%", height: 280 }}>
+          <Text
+            style={{ fontSize: 16, fontWeight: "500", textAlign: "center" }}
+          >
+            Delete Menu
+          </Text>
+          <View>
+            <Pressable
+              onPress={deleteItemsByDate}
+              style={{
+                backgroundColor: "#db7093",
+                width: 140,
+                padding: 10,
+                borderRadius: 20,
+                marginVertical: 12,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+              >
+                Delete Menu
+              </Text>
+            </Pressable>
+          </View>
+        </ModalContent>
+      </BottomModal>
+    </>
   );
 };
 
