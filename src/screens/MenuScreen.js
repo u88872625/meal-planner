@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -9,11 +9,47 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import Types from "../components/types";
+import Recipes from "../components/Recipes";
+import { addMenu, getAllRecipes } from "../../firebase/firestore";
 
 const MenuScreen = () => {
   const route = useRoute();
   const [option, setOption] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [recipes, setRecipes] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    if (route?.params?.items) {
+      setMenuItems(route?.params?.items);
+    }
+  }, [route?.params?.items]);
+
+  console.log(menuItems);
+
+  useEffect(() => {
+    const handleGetRecipes = async () => {
+      const recipes = await getAllRecipes();
+
+      setRecipes(recipes);
+    };
+    handleGetRecipes();
+  }, []);
+
+  const addDishToMenu = async (recipe) => {
+    const dish = {
+      date: route?.params.date,
+      items: [
+        {
+          name: recipe.name,
+          mealType: option,
+          ingredients: recipe.ingredients,
+        },
+      ],
+    };
+    await addMenu(dish);
+  };
+
   return (
     <SafeAreaView>
       <View
@@ -110,6 +146,14 @@ const MenuScreen = () => {
             height: 80,
             marginVertical: 12,
           },
+          menuItems && {
+            height: "auto",
+          },
+          !menuItems && {
+            height: 80,
+            justifyContent: "center",
+            alignItems: "center",
+          },
         ]}
       >
         <Text
@@ -120,8 +164,155 @@ const MenuScreen = () => {
             color: "gray",
           }}
         >
-          there is no menu
+          {menuItems ? "Meal Plan" : "there is no menu"}
         </Text>
+        {menuItems && (
+          <View>
+            {menuItems.some((item) => item.mealType == "早餐") && (
+              <View>
+                <View
+                  style={{
+                    backgroundColor: "#fd5c63",
+                    paddingHorizontal: 7,
+                    paddingVertical: 4,
+                    borderRadius: 20,
+                    marginTop: 5,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 13,
+                      textAlign: "center",
+                      color: "white",
+                    }}
+                  >
+                    早餐
+                  </Text>
+                </View>
+                {menuItems
+                  .filter((item) => item.mealType == "早餐")
+                  .map((item, index) => (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                        marginVertical: 4,
+                      }}
+                      key={index}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#fd5c63",
+                          width: 10,
+                          height: 10,
+                          borderRadius: 5,
+                        }}
+                      ></View>
+                      <Text style={{ fontWeight: "500" }}>{item?.name}</Text>
+                    </View>
+                  ))}
+              </View>
+            )}
+
+            {menuItems.some((item) => item.mealType == "午餐") && (
+              <View>
+                <View
+                  style={{
+                    backgroundColor: "#fd5c63",
+                    paddingHorizontal: 7,
+                    paddingVertical: 4,
+                    borderRadius: 20,
+                    marginTop: 5,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 13,
+                      textAlign: "center",
+                      color: "white",
+                    }}
+                  >
+                    午餐
+                  </Text>
+                </View>
+                {menuItems
+                  .filter((item) => item.mealType == "午餐")
+                  .map((item, index) => (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                        marginVertical: 4,
+                      }}
+                      key={index}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#fd5c63",
+                          width: 10,
+                          height: 10,
+                          borderRadius: 5,
+                        }}
+                      ></View>
+                      <Text style={{ fontWeight: "500" }}>{item?.name}</Text>
+                    </View>
+                  ))}
+              </View>
+            )}
+
+            {menuItems.some((item) => item.mealType == "晚餐") && (
+              <View>
+                <View
+                  style={{
+                    backgroundColor: "#fd5c63",
+                    paddingHorizontal: 7,
+                    paddingVertical: 4,
+                    borderRadius: 20,
+                    marginTop: 5,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 13,
+                      textAlign: "center",
+                      color: "white",
+                    }}
+                  >
+                    晚餐
+                  </Text>
+                </View>
+                {menuItems
+                  .filter((item) => item.mealType == "晚餐")
+                  .map((item, index) => (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                        marginVertical: 4,
+                      }}
+                      key={index}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#fd5c63",
+                          width: 10,
+                          height: 10,
+                          borderRadius: 5,
+                        }}
+                      ></View>
+                      <Text style={{ fontWeight: "500" }}>{item?.name}</Text>
+                    </View>
+                  ))}
+              </View>
+            )}
+          </View>
+        )}
       </Pressable>
 
       <Types selectedType={selectedType} setSelectedType={setSelectedType} />
@@ -159,6 +350,7 @@ const MenuScreen = () => {
           </Text>
         </Pressable>
       </View>
+      <Recipes recipes={recipes} addDishToMenu={addDishToMenu} />
     </SafeAreaView>
   );
 };

@@ -1,5 +1,6 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 import { db } from "./firebase";
+import moment from "moment";
 
 // 取得所有分類
 export const getTypes = async () => {
@@ -10,5 +11,74 @@ export const getTypes = async () => {
     return types;
   } catch (error) {
     console.log("type讀取失敗", error);
+  }
+};
+
+// 取得所有食譜
+export const getAllRecipes = async () => {
+  try {
+    const recipeCollectionRef = collection(db, "recipe");
+    const querySnapshot = await getDocs(recipeCollectionRef);
+    const recipes = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return recipes;
+  } catch (error) {
+    console.log("Recipes讀取失敗", error);
+  }
+};
+
+// 新增menu
+export const addMenu = async (recipe) => {
+  try {
+    await addDoc(collection(db, "menus"), recipe);
+    console.log("新增成功");
+  } catch (error) {
+    console.log("新增失敗", error);
+  }
+};
+
+// 取得所有menu
+export const getAllMenus = async () => {
+  try {
+    const menuCollectionRef = collection(db, "menus");
+    const querySnapshot = await getDocs(menuCollectionRef);
+    const menus = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return menus;
+  } catch (error) {
+    console.log("Recipes讀取失敗", error);
+  }
+};
+
+// 取得一週菜單
+export const fetchWeekMenus = async () => {
+  function formatDateToCustomString(date) {
+    return moment(date).format("ddd DD"); // 使用moment格式化日期
+  }
+
+  let weekDates = [];
+  for (let i = 0; i < 7; i++) {
+    const date = moment().startOf("week").add(i, "days");
+    weekDates.push(formatDateToCustomString(date.toDate()));
+  }
+
+  const weekMenusPromises = weekDates.map((dateString) => {
+    const q = query(collection(db, "menus"), where("date", "==", dateString));
+    return getDocs(q);
+  });
+
+  try {
+    const weekMenusResults = await Promise.all(weekMenusPromises);
+    const weekMenus = weekMenusResults.flatMap((querySnapshot) =>
+      querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
+
+    return weekMenus;
+  } catch (error) {
+    console.error("查詢失敗：", error);
   }
 };
