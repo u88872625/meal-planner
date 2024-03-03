@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Pressable,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Types from "../components/types";
@@ -357,6 +358,7 @@ const MenuScreen = () => {
           </Text>
         </Pressable>
       </View>
+
       <Recipes recipes={filteredRecipes} addDishToMenu={addDishToMenu} />
     </SafeAreaView>
   );
