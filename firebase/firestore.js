@@ -62,7 +62,7 @@ export const getAllMenus = async () => {
 };
 
 // 取得一週菜單
-export const fetchWeekMenus = async () => {
+export const getWeekMenus = async () => {
   function formatDateToCustomString(date) {
     return moment(date).format("ddd DD"); // 使用moment格式化日期
   }

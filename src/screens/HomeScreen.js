@@ -7,58 +7,40 @@ import {
   View,
   ScrollView,
   Pressable,
-  SafeAreaView,
-  use,
   Alert,
 } from "react-native";
-import {
-  getAllMenus,
-  fetchWeekMenus,
-  copyMenu,
-  deleteMenu,
-} from "../../firebase/firestore";
+import { copyMenu, deleteMenu } from "../../firebase/firestore";
 import { BottomModal } from "react-native-modals";
 import { SlideAnimation } from "react-native-modals";
 import { ModalContent } from "react-native-modals";
-import { Modal } from "react-native-modals";
+import { useDispatch, useSelector } from "react-redux";
+import { setDate, setNextDate, setSelectedDate } from "../store/modules/date";
+import { fetchAllMenus, fetchWeekMenus } from "../store/modules/menuThunk";
+import Meal from "../components/Meal";
 
 const HomeScreen = () => {
-  const currentDate = moment();
-  const startOfWeek = currentDate.clone().startOf("week");
-  const endOfWeek = currentDate.clone().endOf("week");
-  const [date, setDate] = useState("");
-  const [nextDate, setNextDate] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [menuData, setMenuData] = useState([]);
-  const [weekMenu, setWeekMenu] = useState([]);
   const [ingredientsSummary, setIngredientsSummary] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [modal, setModal] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { currentDate, startOfWeek, endOfWeek, date, nextDate, selectedDate } =
+    useSelector((state) => state.date);
+  const { menuData, weekMenu } = useSelector((state) => state.menu);
+
+  const startOfWeekMoment = moment(startOfWeek);
 
   const openMadal = (date) => {
-    setDate(date.format("ddd") + " " + date.format("DD"));
+    dispatch(setDate(date.format("ddd") + " " + date.format("DD")));
     const nextDate = moment(date, "ddd DD").add(1, "day").format("ddd DD");
-    setNextDate(nextDate);
+    dispatch(setNextDate(nextDate));
     setModalVisible(!modalVisible);
   };
 
-  // 取得所有menu
-  const handleGetMenu = async () => {
-    try {
-      const menus = await getAllMenus();
-      setMenuData(menus);
-    } catch (error) {
-      console.log(讀取失敗, error);
-    }
-  };
-
-  // 取得一週menu
-  const handleGetWeekMenus = async () => {
-    const weekMenus = await fetchWeekMenus(startOfWeek, endOfWeek);
-    console.log("weekMenus", weekMenus);
-    setWeekMenu(weekMenus);
-  };
+  useEffect(() => {
+    dispatch(fetchAllMenus());
+    dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
+  }, [dispatch]);
 
   const copyItems = async () => {
     const formattedPrevDate = date;
@@ -70,35 +52,30 @@ const HomeScreen = () => {
 
     setModalVisible(false);
 
-    handleGetMenu();
-    handleGetWeekMenus();
+    dispatch(fetchAllMenus());
+    dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
     Alert.alert("Success", "Items copie");
   };
 
   // 刪除menu
   const deleteItems = (date) => {
     setModal(!modal);
-    setSelectedDate(date.format("ddd") + " " + date.format("DD"));
+    dispatch(setSelectedDate(date.format("ddd") + " " + date.format("DD")));
   };
 
   const deleteItemsByDate = async () => {
     const dateToDelete = selectedDate;
     await deleteMenu(dateToDelete);
-    handleGetMenu();
-    handleGetWeekMenus();
+    dispatch(fetchAllMenus());
+    dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
     setModal(false);
   };
 
-  useEffect(() => {
-    handleGetWeekMenus();
-    handleGetMenu();
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
-      handleGetWeekMenus();
-      handleGetMenu();
-    }, [])
+      dispatch(fetchAllMenus());
+      dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
+    }, [dispatch])
   );
 
   // 合併相同日期的menu
@@ -160,20 +137,30 @@ const HomeScreen = () => {
     );
   };
 
-  const renderWeekDates = (startOfWeek) => {
+  const renderWeekDates = (startOfWeekMoment) => {
     let weekDates = [];
     for (let i = 0; i < 7; i++) {
-      const date = startOfWeek.clone().add(i, "days");
+      const date = startOfWeekMoment.clone().add(i, "days");
       const formattedDate = date.format("ddd DD");
-      const menuForDate = menuData.find((menu) => menu.date == formattedDate);
+      const menuForDate = menuData.filter((menu) => menu.date == formattedDate);
       const isCurrentDate = date.isSame(currentDate, "day");
+      const hasBreakfastItems = menuForDate.some((menu) =>
+        menu.items.some((item) => item.mealType === "早餐")
+      );
+      const hasLunchItems = menuForDate.some((menu) =>
+        menu.items.some((item) => item.mealType === "午餐")
+      );
+      const hasDinnerItems = menuForDate.some((menu) =>
+        menu.items.some((item) => item.mealType === "晚餐")
+      );
 
       weekDates.push(
         <View
+          key={i}
           style={{
             flexDirection: "row",
             gap: 12,
-            // marginTop: 2,
+            // marginTop: 10,
             maxHeight: 250,
             overflow: "hidden",
           }}
@@ -213,9 +200,13 @@ const HomeScreen = () => {
           </View>
           <Pressable
             onPress={() => {
+              const allItemsForDate = menuForDate.reduce(
+                (acc, menu) => acc.concat(menu.items),
+                []
+              );
               navigation.navigate("Menu", {
                 date: date.format("ddd") + " " + date.format("DD"),
-                items: menuForDate?.items,
+                items: allItemsForDate,
               });
             }}
             style={[
@@ -246,158 +237,14 @@ const HomeScreen = () => {
             >
               {menuForDate ? "Meal Plan" : "there is no menu"}
             </Text>
-            {menuForDate && (
-              <View>
-                {menuForDate?.items.some((item) => item.mealType == "早餐") && (
-                  <View>
-                    <View
-                      style={{
-                        backgroundColor: "#fd5c63",
-                        paddingHorizontal: 7,
-                        paddingVertical: 4,
-                        borderRadius: 20,
-                        marginTop: 5,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontWeight: "600",
-                          fontSize: 13,
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      >
-                        早餐
-                      </Text>
-                    </View>
-                    {menuForDate?.items
-                      .filter((item) => item.mealType == "早餐")
-                      .map((item, index) => (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 10,
-                            marginVertical: 4,
-                          }}
-                          key={index}
-                        >
-                          <View
-                            style={{
-                              backgroundColor: "#fd5c63",
-                              width: 10,
-                              height: 10,
-                              borderRadius: 5,
-                            }}
-                          ></View>
-                          <Text style={{ fontWeight: "500" }}>
-                            {item?.name}
-                          </Text>
-                        </View>
-                      ))}
-                  </View>
-                )}
-
-                {menuForDate?.items.some((item) => item.mealType == "午餐") && (
-                  <View>
-                    <View
-                      style={{
-                        backgroundColor: "#fd5c63",
-                        paddingHorizontal: 7,
-                        paddingVertical: 4,
-                        borderRadius: 20,
-                        marginTop: 5,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontWeight: "600",
-                          fontSize: 13,
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      >
-                        午餐
-                      </Text>
-                    </View>
-                    {menuForDate?.items
-                      .filter((item) => item.mealType == "午餐")
-                      .map((item, index) => (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 10,
-                            marginVertical: 4,
-                          }}
-                          key={index}
-                        >
-                          <View
-                            style={{
-                              backgroundColor: "#fd5c63",
-                              width: 10,
-                              height: 10,
-                              borderRadius: 5,
-                            }}
-                          ></View>
-                          <Text style={{ fontWeight: "500" }}>
-                            {item?.name}
-                          </Text>
-                        </View>
-                      ))}
-                  </View>
-                )}
-
-                {menuForDate?.items.some((item) => item.mealType == "晚餐") && (
-                  <View>
-                    <View
-                      style={{
-                        backgroundColor: "#fd5c63",
-                        paddingHorizontal: 7,
-                        paddingVertical: 4,
-                        borderRadius: 20,
-                        marginTop: 5,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontWeight: "600",
-                          fontSize: 13,
-                          textAlign: "center",
-                          color: "white",
-                        }}
-                      >
-                        晚餐
-                      </Text>
-                    </View>
-                    {menuForDate?.items
-                      .filter((item) => item.mealType == "晚餐")
-                      .map((item, index) => (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 10,
-                            marginVertical: 4,
-                          }}
-                          key={index}
-                        >
-                          <View
-                            style={{
-                              backgroundColor: "#fd5c63",
-                              width: 10,
-                              height: 10,
-                              borderRadius: 5,
-                            }}
-                          ></View>
-                          <Text style={{ fontWeight: "500" }}>
-                            {item?.name}
-                          </Text>
-                        </View>
-                      ))}
-                  </View>
-                )}
-              </View>
+            {hasBreakfastItems && (
+              <Meal mealType={"早餐"} menuForDate={menuForDate} />
+            )}
+            {hasLunchItems && (
+              <Meal mealType={"午餐"} menuForDate={menuForDate} />
+            )}
+            {hasDinnerItems && (
+              <Meal mealType={"晚餐"} menuForDate={menuForDate} />
             )}
 
             <Pressable
@@ -429,13 +276,15 @@ const HomeScreen = () => {
       weeks.push(
         <View>
           <Text>
-            {startOfWeek
+            {startOfWeekMoment
               .clone()
               .add(i * 7, "days")
               .format("DD MMM")}
           </Text>
 
-          <Text>{renderWeekDates(startOfWeek.clone().add(i * 7, "days"))}</Text>
+          <Text>
+            {renderWeekDates(startOfWeekMoment.clone().add(i * 7, "days"))}
+          </Text>
         </View>
       );
     }
