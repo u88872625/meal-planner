@@ -15,7 +15,7 @@
 
 ### 1. 一週規畫區
 
-![img](https://upload.cc/i1/2024/03/09/yDWXeS.png)
+![img](https://upload.cc/i1/2024/03/17/mN87Lb.png)
 
 ### 2.點擊進入日期，可以看到內建食譜
 
@@ -33,7 +33,13 @@
 
 ### 5. 添加餐期後，可以看到一週食譜的統計需求
 
-![img](https://upload.cc/i1/2024/03/09/KCcDFP.png)
+![img](https://upload.cc/i1/2024/03/17/EPBG1v.png)
+
+
+### 6. 可以複製和刪除餐期
+![img](https://upload.cc/i1/2024/03/17/MzJRic.gif)
+![img](https://upload.cc/i1/2024/03/17/yAu4tb.gif)
+
 
 
 ## 如何使用
