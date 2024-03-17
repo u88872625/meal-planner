@@ -42,6 +42,7 @@ const HomeScreen = () => {
     dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
   }, [dispatch]);
 
+  // 複製menu到下一個日期
   const copyItems = async () => {
     const formattedPrevDate = date;
     const formattedNextDate = nextDate;
@@ -77,17 +78,6 @@ const HomeScreen = () => {
       dispatch(fetchWeekMenus({ startOfWeekMoment, endOfWeek }));
     }, [dispatch])
   );
-
-  // 合併相同日期的menu
-  const mergedMenuData = menuData.reduce((acc, current) => {
-    const found = acc.find((item) => item.date === current.date);
-    if (found) {
-      found.items = [...found.items, ...current.items];
-    } else {
-      acc.push(current);
-    }
-    return acc;
-  }, []);
 
   // 計算一週食材總量
   useEffect(() => {
@@ -160,7 +150,6 @@ const HomeScreen = () => {
           style={{
             flexDirection: "row",
             gap: 12,
-            // marginTop: 10,
             maxHeight: 250,
             overflow: "hidden",
           }}
