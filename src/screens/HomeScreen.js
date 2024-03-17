@@ -78,17 +78,6 @@ const HomeScreen = () => {
     }, [dispatch])
   );
 
-  // 合併相同日期的menu
-  const mergedMenuData = menuData.reduce((acc, current) => {
-    const found = acc.find((item) => item.date === current.date);
-    if (found) {
-      found.items = [...found.items, ...current.items];
-    } else {
-      acc.push(current);
-    }
-    return acc;
-  }, []);
-
   // 計算一週食材總量
   useEffect(() => {
     let newIngredientsSummary = {};
@@ -160,7 +149,6 @@ const HomeScreen = () => {
           style={{
             flexDirection: "row",
             gap: 12,
-            // marginTop: 10,
             maxHeight: 250,
             overflow: "hidden",
           }}
