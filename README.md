@@ -19,11 +19,11 @@
 
 ### 2.點擊進入日期，可以看到內建食譜
 
-![img](https://upload.cc/i1/2024/03/09/ehwFOY.gif)
+![img](https://upload.cc/i1/2024/03/17/vIp8my.gif)
 
 ### 3. 新增食譜到指定餐期
 
-![img](https://upload.cc/i1/2024/03/09/pw0oN6.gif)
+![img](https://upload.cc/i1/2024/03/17/yHQdFx.gif)
 
 
 ### 4. 點擊食譜後可看到詳細內容
