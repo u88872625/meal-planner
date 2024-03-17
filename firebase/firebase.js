@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA9UxRyJqj6PVqoD1bm4QV5IiSzhKRxfT0",
-  authDomain: "meal-planner-ff63a.firebaseapp.com",
-  projectId: "meal-planner-ff63a",
-  storageBucket: "meal-planner-ff63a.appspot.com",
-  messagingSenderId: "858487927874",
-  appId: "1:858487927874:web:1296771a9896ee3c61e9db",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
