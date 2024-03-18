@@ -15,7 +15,7 @@
 
 ### 1. 一週規畫區
 
-![img](https://upload.cc/i1/2024/03/17/gUal2n.png)
+![img](https://upload.cc/i1/2024/03/18/sQRrfO.png)
 
 ### 2.點擊進入日期，可以看到內建食譜
 
