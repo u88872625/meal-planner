@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import moment from "moment";
 
 // const currentDate = moment();
-const currentDateStr = moment().format(); // 默认为 ISO 8601 格式字符串
+const currentDateStr = moment().format(); 
 const startOfWeekStr = moment().startOf("week").format();
 const endOfWeekStr = moment().endOf("week").format();
 const initialState = {
