@@ -19,26 +19,26 @@
 
 ### 2.點擊進入日期，可以看到內建食譜
 
-![img](https://upload.cc/i1/2024/03/17/vIp8my.gif)
+![img](https://upload.cc/i1/2024/03/18/X4jFcn.gif)
 
 ### 3. 新增食譜到指定餐期
 
-![img](https://upload.cc/i1/2024/03/17/yHQdFx.gif)
+![img](https://upload.cc/i1/2024/03/18/mxC7NR.gif)
 
 
 ### 4. 點擊食譜後可看到詳細內容
 
-![img](https://upload.cc/i1/2024/03/09/yQXZw0.png) 
+![img](https://upload.cc/i1/2024/03/18/G7uFE6.png) 
 
 
 ### 5. 添加餐期後，可以看到一週食譜的統計需求
 
-![img](https://upload.cc/i1/2024/03/17/43NG5l.png)
+![img](https://upload.cc/i1/2024/03/18/HhX7tG.png)
 
 
 ### 6. 可以複製和刪除餐期
-![img](https://upload.cc/i1/2024/03/17/MzJRic.gif)
-![img](https://upload.cc/i1/2024/03/17/yAu4tb.gif)
+![img](https://upload.cc/i1/2024/03/18/S1qIbP.gif)
+
 
 
 
